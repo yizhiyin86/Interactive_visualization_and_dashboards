@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Belly Button Biodiversity</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js"></script>
+    <link rel="stylesheet" href="https://bootswatch.com/4/minty/bootstrap.css"> 
+</head>
+<body>
+    <div class="jumbotron" style="margin:0 auto;margin-top:5rem;margin-left:2rem;margin-right:2rem;">
+        <h1 class="display-3">Belly Button Biodiversity Dashboard</h1>
+        <p class="lead">Use interactive chart below to explore the dataset</p>
+        <p class="lead">
+        <ul class='list-group'>
+       <li> <a href="http://robdunnlab.com/projects/belly-button-biodiversity/"> 
+        ROB DUNN's lab for the original dataset.
+        </a></li>
+        <li> <a href="http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0047712">
+            Paper : A Jungle in There: Bacteria in Belly Buttons are Highly Diverse, but Predictable
+        </a></li>
+        </ul>
+
+     </div>
+    
+     <div class="row">
+            <div id='select_box' style="width:50px;height:20px;margin-left:5rem;margin-top:2rem">
+                    <select id="selDataset" onchange="getData(this.value)">
+                            <script>
+                                        // populate the dropdown menu
+                                        // use Plotly.d3.json to get a list of names
+                                            var nameurl='/names';
+                                            Plotly.d3.json(nameurl,function(error,response){
+                                                // if (error) return console.warn(error);
+                                                console.log(response);
+                            
+                                                // 
+                                                var selDataset = document.getElementById("selDataset");
+                                                for (var i=0;i<response.length;i++){
+                                                    var option = document.createElement('option');
+                                                    // console.log(response[i]);
+                                                    option.value=response[i];
+                                                    // console.log('option value is '+ option.value);
+                                                    option.text=response[i];
+                                                    selDataset.appendChild(option);
+                                                }
+                                            });
+                                    </script>
+                    </select>
+                  </div>
+         <div id='piechartbox' class="jumbotron col-sm-6 col-md-6" style="margin:0 auto;margin-top:5rem">
+            <div id="pie"></div>
+        </div>
+        <div id='metadata' class="jumbotron col-sm-4 col-md-4" style="margin:0 auto;margin-top:5rem">
+            <h3 align='center'>MetaData Summary</h3>
+            <ul id='metalist'></ul>
+        </div>
+    </div>
+    
+     <div id='bubblechart_box' class="jumbotron col-sm-12 col-md-12" style="margin:0 auto;margin-top:5rem">
+                        
+        <div id="bubble"></div>
+                       
+        </div>
+        <script>
+            
+                // Plot the default route once the page loads
+                var default_url = "/samples/BB_940";
+                Plotly.d3.json(default_url, function(error, response) 
+                {
+                    if (error) return console.warn(error);
+    
+                    // assign sample values and convert the sample values from string into numbers
+                    var sample_values = response.sample_values.slice(0,10).map(x=>+x);
+                    console.log(sample_values);
+    
+                    // assign otu_ids to a variable
+                    var otu_ids = response.otu_ids.slice(0,10);
+                    console.log(otu_ids);
+    
+                    // put sample_values as values and otu_ids as labels for a pie chart
+                    var data_pie = [ { 
+                        values: sample_values,
+                        labels: otu_ids,
+                        type: 'pie'
+                    }];
+                    // try to get the meta
+                    var defaul_meta=''
+                    
+                    // get the layout for the piechart
+                    var layout_pie={title: "OTU_IDs with Top 10 Sample Values"};
+                    
+                    // assign variable PIE as a ID element in HTML and plot
+                    var PIE = document.getElementById('pie');
+                    Plotly.plot(PIE, data_pie, layout_pie)
+    
+                    //plot bubble chart
+                    var y_values = response.sample_values.map(x=>+x);
+                    // assign otu_ids to a variable
+                    var x_values = response.otu_ids.map(x=>+x);
+                    // console.log('bubble x_value is'+ x_values);
+                    // console.log('bubble y_values is '+ y_values);
+                    var min=Math.min(...y_values);
+                    var max=Math.max(...y_values);
+    
+                    //data bubble
+    
+                    var data_bubble= [ { 
+                                        x: x_values,
+                                        y: y_values,
+                                        mode: 'markers',
+                                        marker: {
+                                                    size: y_values,
+                                                    sizeref: 0.2,
+                                                    sizemode: 'area',
+                                                    color:y_values,
+                                                    colorscale: [[min,'rgb(215,48,39)'],
+                                                                [max,'rgb(49,54,149)']]
+                                                
+                                                },
+                                        type: 'scatter'
+                                        
+                                    }];
+    
+                // bubble layout
+                var layout_bubble = {
+                                        title: 'OTU_ID and Sample Values',
+                                        showlegend: false,
+                                                    
+                                    };
+    
+                var Bubble = document.getElementById('bubble');
+                Plotly.plot(Bubble, data_bubble, layout_bubble)
+                });
+             
+            // new_meta
+            var dafaul_meta ="/metadata/BB_940";
+            Plotly.d3.json(dafaul_meta,function(error,meta){
+            console.log(meta);
+            var metalist=document.getElementById('metalist');
+            var meta_keys=Object.keys(meta);
+            console.log('meta_keys are',meta_keys);
+            var meta_values=Object.values(meta);
+            for (var i=0;i<meta_keys.length;i++)
+            {
+                var li = document.createElement('li');
+                // console.log('option value is '+ option.value);
+                li.innerHTML=`${meta_keys[i]} : ${meta_values[i]}`;
+                metalist.appendChild(li);
+            };                                  
+            });
+    
+                // Update the plot with new data
+                function updatePlotly(newdata) {
+                    //-----------------------------------
+                    //update pie
+                    //get element ID
+                    var PIE = document.getElementById('pie');
+                    //convert values again
+                    var sample_values = newdata.sample_values.slice(0,10).map(x=>+x);
+                    console.log(sample_values);
+                    var otu_ids = newdata.otu_ids.slice(0,10);
+                    console.log(otu_ids);
+                    // restyle values and labels for the pie chart with new values and labels
+                    Plotly.restyle(PIE, 'values', [sample_values])
+                    Plotly.restyle(PIE, 'labels', [otu_ids])
+                    //---------------------------------------------
+                    // update bubble
+    
+                    //get element ID
+                    var Bubble = document.getElementById('bubble');
+                    //get y_values
+                    var y_values = newdata.sample_values.map(x=>+x);
+                    // console.log(y_values);
+                    // assign otu_ids to a variable
+                    var x_values = newdata.otu_ids.map(x=>+x);
+                    // console.log(x_values);
+                    //set up min and max
+                    var min=Math.min(...y_values);
+                    var max=Math.max(...y_values);
+                    var new_marker=[{
+                                        size: y_values,
+                                        sizeref: 0.2,
+                                        sizemode: 'area',
+                                        color:y_values,
+                                        colorscale: [[min,'rgb(215,48,39)'],
+                                                    [max,'rgb(49,54,149)']]
+                                    }];
+                    
+                                    
+                    // restyle values and labels for the pie chart with new values and labels
+                    Plotly.restyle(Bubble, 'x', [x_values])
+                    Plotly.restyle(Bubble, 'y', [y_values])
+                    Plotly.restyle(Bubble, 'marker', new_marker)
+    
+                }
+
+                function updateMeta(meta){
+                    var meta_keys=Object.keys(meta);
+                    var meta_values=Object.values(meta);
+                    var list=document.getElementById('metalist').getElementsByTagName('li');
+                    console.log('old list is ', list);
+                    for (var i=0;i<list.length;i++) {
+                        list[i].innerHTML=`${meta_keys[i]} : ${meta_values[i]}`;
+                    }
+                    
+                };      
+    
+                // Get new data whenever the dropdown selection changes
+                function getData(route) {
+                    console.log(route);
+                    Plotly.d3.json(`/samples/${route}`, function(error, data) {
+                        console.log("newdata", data);
+                        updatePlotly(data);
+                    });
+                    Plotly.d3.json(`/metadata/${route}`,function(error,metadata){
+                        console.log('newmeta', metadata);
+                        updateMeta(metadata);
+                    });
+                };
+                </script>
+        
+        <!-- <script>
+            var dafaul_meta ="/metadata/BB_940";
+            Plotly.d3.json(dafaul_meta,function(error,meta){
+                console.log(meta);
+            var age=document.getElementById('age');
+            age.innerHTML=meta.age;
+            console.log(meta.age);
+            });
+            
+            function updatePlotly(newmeta){
+            var age=document.getElementById('age');
+            age.text=newmeta.AGE;   
+            };
+            
+            function getData(route){
+                console.log(route);
+                Plotly.d3.json(`metadata/${route}`, function(error,meta){
+                    console.log('newdata meta', meta);
+                    updatePlotly(meta);
+                });
+            };
+
+        </script> -->
+    
+    </div>
+        
+</body>
+</html>
