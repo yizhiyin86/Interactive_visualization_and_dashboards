@@ -86,8 +86,6 @@
                         labels: otu_ids,
                         type: 'pie'
                     }];
-                    // try to get the meta
-                    var defaul_meta=''
                     
                     // get the layout for the piechart
                     var layout_pie={title: "OTU_IDs with Top 10 Sample Values"};
@@ -221,30 +219,6 @@
                     });
                 };
                 </script>
-        
-        <!-- <script>
-            var dafaul_meta ="/metadata/BB_940";
-            Plotly.d3.json(dafaul_meta,function(error,meta){
-                console.log(meta);
-            var age=document.getElementById('age');
-            age.innerHTML=meta.age;
-            console.log(meta.age);
-            });
-            
-            function updatePlotly(newmeta){
-            var age=document.getElementById('age');
-            age.text=newmeta.AGE;   
-            };
-            
-            function getData(route){
-                console.log(route);
-                Plotly.d3.json(`metadata/${route}`, function(error,meta){
-                    console.log('newdata meta', meta);
-                    updatePlotly(meta);
-                });
-            };
-
-        </script> -->
     
     </div>
         

@@ -50,12 +50,7 @@ def sample_names():
     # sample names are column (from the 2nd column) names for the table samples
     names = samples.__table__.columns.keys()[1:]
 
-    # # Generate the plot trace
-    # plot_trace = {
-    #     "x": emoji_char,
-    #     "y": scores,
-    #     "type": "bar"
-    # }
+    
     return jsonify(names)
 
 
@@ -68,56 +63,31 @@ def otu_description():
     results=session.query(otu.lowest_taxonomic_unit_found).all()
     descp=[i[0] for i in results]
     
-    # # Format the data for Plotly
-    # plot_trace = {
-    #         "x": df["emoji_id"].values.tolist(),
-    #         "y": df["score"].values.tolist(),
-    #         "type": "bar"
-    # }
     return jsonify(descp)
 
 @app.route("/metadata/<sample>")
 def meta_data(sample):
-    """Return emoji score and emoji name"""
 
-    # query for the top 10 emoji data
+    #extract the id number of sample name eg. BB_940 into 940 for search
     search=int(sample[3:])
     print(sample)
     result =session.query(meta).filter(meta.SAMPLEID==search).all()
+    #convert result into dictionary
     dict_result=result[0].__dict__
+    # last part of dictionary is _sa_instance_state and needs to be removed
     del dict_result['_sa_instance_state']
-
-    # # Format the data for Plotly
-    # plot_trace = {
-    #         "x": df["name"].values.tolist(),
-    #         "y": df["score"].values.tolist(),
-    #         "type": "bar"
-    # }
     return jsonify(dict_result)
 
 @app.route("/wfreq/<sample>")
 def wfreq_data(sample):
-    """Return emoji score and emoji name"""
-
-    # query for the top 10 emoji data
+    #extract the id number of sample name eg. BB_940 into 940 for search
     search=int(sample[3:])
     print(sample)
     result =session.query(meta.WFREQ).filter(meta.SAMPLEID==search).all()[0][0]
-    
-
-    # # Format the data for Plotly
-    # plot_trace = {
-    #         "x": df["name"].values.tolist(),
-    #         "y": df["score"].values.tolist(),
-    #         "type": "bar"
-    # }
     return jsonify(result)
 
 @app.route('/samples/<sample>')
 def sample_data(sample):
-    """Return emoji score and emoji name"""
-
-    # query for the top 10 emoji data
     search=sample
     # session.query(sample)
     sel='samples.{}'.format(search)
@@ -127,19 +97,12 @@ def sample_data(sample):
     data=pd.DataFrame(result_1,columns=['OTU_ID','Sample_Values']).sort_values('Sample_Values',ascending=False)
     
     #convert the int into string so it can be jsonified
-    # I only returned the top 10 samples
 
     otu_id_str=list(data['OTU_ID'].astype('str'))
     values_str=list(data['Sample_Values'].astype('str'))
     return_dict={'otu_ids':otu_id_str,'sample_values':values_str}
     print(return_dict)
 
-    # # Format the data for Plotly
-    # plot_trace = {
-    #         "x": df["name"].values.tolist(),
-    #         "y": df["score"].values.tolist(),
-    #         "type": "bar"
-    # }
     return jsonify(return_dict)
 
 
