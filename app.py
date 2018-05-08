@@ -13,7 +13,7 @@ from flask import (
 # Reflect Database
 #################################################
 #connect to belly_button_biodiversity.sqlite 
-engine = create_engine("sqlite:///db/belly_button_biodiversity.sqlite", echo=False)
+engine = create_engine("sqlite:///belly_button_biodiversity.sqlite", echo=False)
 #use automap base
 # Reflect Database into ORM classes 
 Base = automap_base()
